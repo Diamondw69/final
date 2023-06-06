@@ -1,0 +1,34 @@
+syntax="proto3";
+
+import "google/protobuf/timestamp.proto";
+option go_package="./proto";
+
+package auth;
+
+message User {
+  int64 id=1;
+  string name=2;
+  string email=4;
+  Password password=5;
+  string role=6;
+  int64 balance=7;
+}
+
+message Password {
+  string plainText=1;
+  bytes hash=2;
+}
+
+message Token {
+  string plainText=1;
+  bytes hash=2;
+  int64 id=3;
+  google.protobuf.Timestamp expiry=4;
+  string scope=5;
+}
+
+service AuthService {
+  rpc Register (User) returns (Token){}
+  rpc Login (User) returns (Token){}
+}
+
