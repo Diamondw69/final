@@ -4,6 +4,7 @@ import (
 	"authTest/internal/validator"
 	pb "authTest/pkg/proto"
 	"context"
+	"crypto/sha256"
 	"database/sql"
 	"errors"
 	"golang.org/x/crypto/bcrypt"
@@ -17,6 +18,7 @@ type UserModel struct {
 var (
 	ErrDuplicateEmail = errors.New("duplicate email")
 	ErrRecordNotFound = errors.New("record not found")
+	ErrEditConflict   = errors.New("edit conflict")
 )
 
 func (m UserModel) Insert(user *pb.User) error {
@@ -68,6 +70,78 @@ WHERE email = $1`
 			return nil, err
 		}
 	}
+	return &user, nil
+}
+
+func (m UserModel) Update(user *pb.User) error {
+	query := `
+UPDATE users
+SET name = $1, email = $2, password_hash = $3,role=$5,balance=$6
+WHERE id = $5
+RETURNING id`
+	args := []any{
+		user.Name,
+		user.Email,
+		user.Password.Hash,
+		user.Role,
+		user.Id,
+		user.Balance,
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	err := m.DB.QueryRowContext(ctx, query, args...).Scan(&user.Id)
+	if err != nil {
+		switch {
+		case err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
+			return ErrDuplicateEmail
+		case errors.Is(err, sql.ErrNoRows):
+			return ErrEditConflict
+		default:
+			return err
+		}
+	}
+	return nil
+}
+
+func (m UserModel) GetForToken(tokenScope, tokenPlaintext string) (*pb.User, error) {
+
+	tokenHash := sha256.Sum256([]byte(tokenPlaintext))
+
+	query := `
+SELECT users.id, users.name, users.email, users.password_hash,users.role,users.balance
+FROM users
+INNER JOIN tokens
+ON users.id = tokens.user_id
+WHERE tokens.hash = $1
+AND tokens.scope = $2
+AND tokens.expiry > $3`
+
+	args := []interface{}{tokenHash[:], tokenScope, time.Now()}
+	var user pb.User
+	password := pb.Password{
+		PlainText: tokenPlaintext,
+		Hash:      []byte("auvhjkdfbhjlvadfjlhkgadskjlhadshjkasdkjhasdkhjb;asdjbkasdjkhasdj")}
+	user.Password = &password
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := m.DB.QueryRowContext(ctx, query, args...).Scan(
+		&user.Id,
+		&user.Name,
+		&user.Email,
+		&user.Password.Hash,
+		&user.Role,
+		&user.Balance,
+	)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+
 	return &user, nil
 }
 

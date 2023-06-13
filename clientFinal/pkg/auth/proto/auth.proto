@@ -1,7 +1,7 @@
 syntax="proto3";
 
 import "google/protobuf/timestamp.proto";
-option go_package="./pkg/auth/proto";
+option go_package="./proto";
 
 package auth;
 
@@ -27,8 +27,23 @@ message Token {
   string scope=5;
 }
 
-service AuthService {
-  rpc Register (User) returns (Token){}
+message Confirm{
+  bool ok=1;
+  string message=2;
+}
+message Update{
+  string tokenValue=1;
+  string name=2;
+}
+message Profile{
+  string tokenValue=1;
+}
+
+service UserService {
+  rpc Register (User) returns (Confirm){}
   rpc Login (User) returns (Token){}
+  rpc UpdateUser (Update) returns (Confirm){}
+  rpc DeleteUser (User) returns (Confirm){}
+  rpc ProfileUser (Profile) returns (User){}
 }
 

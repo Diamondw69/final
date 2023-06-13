@@ -25,6 +25,10 @@ func MakeRouter() *mux.Router {
 	router.HandleFunc("/login", handlers.LoginHtmlHandler).Methods("GET", "OPTIONS")
 	router.HandleFunc("/login", handlers.LoginHandler).Methods("POST", "OPTIONS")
 
+	//crud User
+	router.HandleFunc("/profile", handlers.ProfileHtmlHandler).Methods("GET", "OPTIONS")
+	router.HandleFunc("/profile", handlers.UpdateUserHandler).Methods("POST", "OPTIONS")
+
 	//Logout
 	router.HandleFunc("/logout", handlers.LogoutHandler).Methods("GET", "OPTIONS")
 

@@ -42,7 +42,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	conn := ConnectGrpc()
 	defer conn.Close()
 
-	client := pb.NewAuthServiceClient(conn)
+	client := pb.NewUserServiceClient(conn)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -78,7 +78,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	conn := ConnectGrpc()
 	defer conn.Close()
 
-	client := pb.NewAuthServiceClient(conn)
+	client := pb.NewUserServiceClient(conn)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -104,5 +104,34 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		logout.MaxAge = -1
 		http.SetCookie(w, logout)
+	}
+}
+
+func UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	token, err := r.Cookie("token")
+	if err != nil {
+		log.Fatalf("Token nety")
+	}
+
+	conn := ConnectGrpc()
+	defer conn.Close()
+
+	client := pb.NewUserServiceClient(conn)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	update := pb.Update{
+		TokenValue: token.Value,
+		Name:       r.Form.Get("name"),
+	}
+
+	confirm, _ := client.UpdateUser(ctx, &update)
+
+	if confirm.Ok {
+		http.Redirect(w, r, "/profile", 303)
+	} else {
+		http.Redirect(w, r, "/", 303)
 	}
 }
