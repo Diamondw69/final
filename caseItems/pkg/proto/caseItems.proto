@@ -1,0 +1,33 @@
+syntax="proto3";
+
+option go_package="./proto";
+
+package caseItem;
+
+message CaseItem {
+  int64 id=1;
+  string itemName=2;
+  string itemDescription=3;
+  string type=4;
+  int64 stars=5;
+  bytes image=6;
+}
+message Confirm{
+  bool ok=1;
+  string message=2;
+}
+message CaseItemRequest{
+  int64 id=1;
+  string name=2;
+}
+message CaseItems{
+  repeated CaseItem CaseItems=1;
+}
+
+service UserService {
+  rpc CreateCaseItem(CaseItem) returns(Confirm){}
+  rpc DeleteCaseItem(CaseItem) returns(Confirm){}
+  rpc ShowCaseItem(CaseItemRequest) returns(CaseItem){}
+  rpc GetAllCaseItems(Confirm) returns(CaseItems){}
+}
+
