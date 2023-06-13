@@ -13,6 +13,7 @@ import (
 var tmpl *template.Template
 
 func ConnectGrpc() *grpc.ClientConn {
+
 	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Failed to connect: %v", err)
@@ -21,6 +22,7 @@ func ConnectGrpc() *grpc.ClientConn {
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
+	//Parsing form
 	err := r.ParseForm()
 	if err != nil {
 		http.Error(w, "Error parsing form data", http.StatusBadRequest)
@@ -30,6 +32,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	password := r.Form.Get("password")
 	email := r.Form.Get("email")
 
+	//Making user object
 	user := pb.User{
 		Name:    name,
 		Email:   email,
@@ -39,6 +42,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	password1 := data.Set(password)
 	user.Password = password1
 
+	//Connecting to grpc
 	conn := ConnectGrpc()
 	defer conn.Close()
 
@@ -47,6 +51,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	//Calling register function from grpc
 	_, err = client.Register(ctx, &user)
 	if err != nil {
 		log.Fatalf("Error caused by :%s", err)
@@ -64,17 +69,20 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	password1 := r.Form.Get("password")
 	email := r.Form.Get("email")
 
+	//Making password object to fix nil bug
 	password := pb.Password{
 		PlainText: "",
 		Hash:      []byte("a"),
 	}
 
+	//Creating user object to fill data
 	user := pb.User{
 		Email: email,
 	}
 
 	user.Password = &password
 	user.Password.PlainText = password1
+
 	conn := ConnectGrpc()
 	defer conn.Close()
 
@@ -88,6 +96,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("Error caused by :%s", err)
 	}
 
+	//Creating a cookie to use token in future
 	cookie := http.Cookie{
 		Name:   "token",
 		Value:  token.PlainText,
@@ -100,11 +109,14 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+	//Searching for a cookie, if one exists it will be deleted
+	//Our project`s frontend works on this cookie, that is why deleting a cookie will make a user unauthorized
 	logout, err := r.Cookie("token")
 	if err == nil {
 		logout.MaxAge = -1
 		http.SetCookie(w, logout)
 	}
+	http.Redirect(w, r, "/", 303)
 }
 
 func UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -122,11 +134,13 @@ func UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	//Making update request
 	update := pb.Update{
 		TokenValue: token.Value,
 		Name:       r.Form.Get("name"),
 	}
 
+	//Getting confirm response
 	confirm, _ := client.UpdateUser(ctx, &update)
 
 	if confirm.Ok {

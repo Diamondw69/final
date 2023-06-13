@@ -3,11 +3,12 @@ package handlers
 import (
 	pb "clientFinal/pkg/auth/proto"
 	"context"
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
 )
+
+//We need Pages.go to group handler that only used to show html pages
 
 func RegisterHTMLHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl = template.Must(template.ParseFiles("cmd/caseApp/static/templates/register.html"))
@@ -24,6 +25,7 @@ func LoginHtmlHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl.ExecuteTemplate(w, "login.html", nil)
 }
 
+// ProfileHtmlHandler method uses token to get data about user from server
 func ProfileHtmlHandler(w http.ResponseWriter, r *http.Request) {
 
 	token, err := r.Cookie("token")
@@ -41,7 +43,7 @@ func ProfileHtmlHandler(w http.ResponseWriter, r *http.Request) {
 
 	profile := pb.Profile{TokenValue: token.Value}
 	user, _ := client.ProfileUser(ctx, &profile)
-	fmt.Println(user)
+
 	tmpl = template.Must(template.ParseFiles("cmd/caseApp/static/templates/profile.html"))
 	tmpl.ExecuteTemplate(w, "profile.html", user)
 }

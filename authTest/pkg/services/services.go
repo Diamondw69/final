@@ -8,7 +8,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -25,10 +24,13 @@ type AuthServer struct {
 }
 
 func NewGrpcServer(rabbitMQConn *amqp.Connection, db *sql.DB) {
+
+	//Getting data from env
 	Connections.EnvLoader("./configs/env/.env")
 
 	grpcServer := grpc.NewServer()
 
+	//Making new auth server and starting server
 	AuthSrv := &AuthServer{
 		rabbitMQConn: rabbitMQConn,
 		DB:           db,
@@ -71,11 +73,13 @@ func (a *AuthServer) Register(ctx context.Context, user *proto.User) (*proto.Con
 		}
 	}
 
+	//Adding new user to a DB
 	err := data.UserModel.Insert(data.UserModel{DB: a.DB}, user)
 	if err != nil {
 		return nil, err
 	}
 
+	//Retrieving confirm
 	confirm.Ok = true
 	confirm.Message = "Register was successfully"
 
@@ -102,16 +106,18 @@ func (a *AuthServer) Login(ctx context.Context, user *proto.User) (*proto.Token,
 			return &tokenK, err
 		}
 	}
-
+	//tmp for user plaintext password
 	userPassPlain := user.Password.PlainText
 
 	user, err := data.UserModel.GetByEmail(data.UserModel{DB: a.DB}, user.Email)
-
-	user.Password.PlainText = userPassPlain
 	if err != nil {
 		return nil, err
 	}
 
+	//Getting password back
+	user.Password.PlainText = userPassPlain
+
+	//Password validation
 	match, err := data.Matches(user.Password.PlainText, user.Password.Hash)
 
 	if err != nil {
@@ -121,6 +127,7 @@ func (a *AuthServer) Login(ctx context.Context, user *proto.User) (*proto.Token,
 		return nil, err
 	}
 
+	//Making auth token
 	token, err := data.TokenModel.New(data.TokenModel{DB: a.DB}, user.Id, 3*24*time.Hour, data.ScopeAuthentication)
 
 	return token, nil
@@ -131,10 +138,12 @@ func (a *AuthServer) UpdateUser(ctx context.Context, update *proto.Update) (*pro
 
 	log.Printf("Updating a user : %s", update.Name)
 
-	user, _ := data.UserModel.GetForToken(data.UserModel{DB: a.DB}, data.ScopeAuthentication, update.TokenValue)
+	//Changing Username
+	user, err := data.UserModel.GetForToken(data.UserModel{DB: a.DB}, data.ScopeAuthentication, update.TokenValue)
 	user.Name = update.Name
-	err := data.UserModel.Update(data.UserModel{DB: a.DB}, user)
+	err = data.UserModel.Update(data.UserModel{DB: a.DB}, user)
 
+	//if error acquires
 	if err != nil {
 		return &proto.Confirm{
 			Ok:      false,
@@ -142,6 +151,7 @@ func (a *AuthServer) UpdateUser(ctx context.Context, update *proto.Update) (*pro
 		}, err
 	}
 
+	//if success
 	return &proto.Confirm{
 		Ok:      true,
 		Message: "Update was successfully",
@@ -151,10 +161,10 @@ func (a *AuthServer) UpdateUser(ctx context.Context, update *proto.Update) (*pro
 func (a *AuthServer) ProfileUser(ctx context.Context, update *proto.Profile) (*proto.User, error) {
 
 	log.Printf("Getting Profile")
-	fmt.Println(update.TokenValue)
+
+	//Finding user by token
 	user, err := data.UserModel.GetForToken(data.UserModel{DB: a.DB}, data.ScopeAuthentication, update.TokenValue)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 	return user, nil

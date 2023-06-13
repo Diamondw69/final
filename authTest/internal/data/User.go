@@ -76,7 +76,7 @@ WHERE email = $1`
 func (m UserModel) Update(user *pb.User) error {
 	query := `
 UPDATE users
-SET name = $1, email = $2, password_hash = $3,role=$5,balance=$6
+SET name = $1, email = $2, password_hash = $3,role=$4,balance=$6
 WHERE id = $5
 RETURNING id`
 	args := []any{
@@ -113,10 +113,9 @@ FROM users
 INNER JOIN tokens
 ON users.id = tokens.user_id
 WHERE tokens.hash = $1
-AND tokens.scope = $2
-AND tokens.expiry > $3`
+AND tokens.scope = $2`
 
-	args := []interface{}{tokenHash[:], tokenScope, time.Now()}
+	args := []interface{}{tokenHash[:], tokenScope}
 	var user pb.User
 	password := pb.Password{
 		PlainText: tokenPlaintext,
