@@ -132,6 +132,7 @@
         <th>Type</th>
         <th>Stars</th>
         <th><center>Image</center></th>
+        <th>Delete</th>
       </tr>
       </thead>
       <tbody>
@@ -143,6 +144,7 @@
         <td>{{$k.Type}}</td>
         <td>{{$k.Stars}}</td>
         <td><img src="/images/{{$k.Id}}" alt="My Image" width="200px"></td>
+        <td><a href="/deleteCaseItem/{{$k.Id}}"><img src="/cmd/caseApp/static/images/trash" style="width: 40px"></a></td>
       </tr>
       {{end}}
       </tbody>

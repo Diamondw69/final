@@ -4,6 +4,7 @@ import (
 	pb "clientFinal/pkg/caseItems/proto"
 	"context"
 	"fmt"
+	"github.com/gorilla/mux"
 	"google.golang.org/grpc"
 	"html/template"
 	"io/ioutil"
@@ -76,4 +77,36 @@ func CreateCaseItemHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Println("vse ploho")
 	}
+}
+
+func DeleteCaseItemHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+	num, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+	//Connecting to grpc
+	conn := ConnectGrpc()
+	defer conn.Close()
+
+	client := pb.NewUserServiceClient(conn)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	caseItem := pb.CaseItem{Id: num}
+
+	confirm, err := client.DeleteCaseItem(ctx, &caseItem)
+	if err != nil {
+		fmt.Println("Problem in delete handler")
+	}
+
+	if confirm.Ok {
+		fmt.Println("Vse ok")
+	} else {
+		fmt.Println("Vse plohaa")
+	}
+
+	http.Redirect(w, r, "/listcaseitems", 303)
 }
