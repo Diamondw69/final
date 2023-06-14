@@ -3,6 +3,7 @@ package router
 import (
 	"clientFinal/pkg/auth/handlers"
 	"clientFinal/pkg/caseItems/handlerCaseItem"
+	handlercase "clientFinal/pkg/cases/handler"
 	"github.com/gorilla/mux"
 	"net/http"
 )
@@ -39,6 +40,13 @@ func MakeRouter() *mux.Router {
 	router.HandleFunc("/caseitemadd", handlerCaseItem.CreateCaseItemHandler).Methods("POST", "OPTIONS")
 	router.HandleFunc("/listcaseitems", handlerCaseItem.GetAllCaseItemsHTMLHandler).Methods("GET", "OPTIONS")
 	router.HandleFunc("/deleteCaseItem/{id}", handlerCaseItem.DeleteCaseItemHandler).Methods("GET", "OPTIONS")
+
+	//crud Cases
+	router.HandleFunc("/caseadd", handlercase.CreateCaseHTMLHandler).Methods("GET", "OPTIONS")
+	router.HandleFunc("/caseadd", handlercase.CreateCaseHandler).Methods("POST", "OPTIONS")
+	router.HandleFunc("/case/{id}", handlercase.ViewCaseHandler).Methods("GET", "OPTIONS")
+	router.HandleFunc("/cases", handlercase.ViewAllCaseHandler).Methods("GET", "OPTIONS")
+	router.HandleFunc("/deletecase/{id}", handlercase.DeleteCaseHandler).Methods("GET", "OPTIONS")
 
 	return router
 }

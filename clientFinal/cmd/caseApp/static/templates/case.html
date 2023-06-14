@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<style>
+  @font-face {
+    font-family: 'MyCustomFont'; /* Choose a name for your font family */
+    src: url("../cmd/caseApp/static/font/zh-cn.ttf"); /* Replace 'path/to/your/font/file.ttf' with the path to your font file */
+  }
+  * {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+
+  }
+  #container{
+
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+  }
+  body{
+    background-image: url("https://wallpapercave.com/wp/wp7486872.jpg");
+    background-size: cover;
+    font-family: 'MyCustomFont', sans-serif;
+  }
+  .cardList {
+    height: 110px;
+    width: 300px;
+    border: 1px solid #33e;
+    overflow: hidden;
+    white-space: nowrap;
+
+  }
+  .spinning{
+    background: #9ebfef;
+    width: 300px;
+    height: 200px;
+    margin: auto; /* center the box horizontally */
+    position: absolute; /* position the box */
+    top: 0; bottom: 0; left: 0; right: 0; /* center the box vertically */
+    box-sizing: border-box; /* include padding in the width calculation */
+    text-align: center;
+    color: #4c74d2;
+  }
+  .card {
+    display: inline-block;
+    text-align: center;
+    height: 110px;
+    width: 100px;
+    line-height: 100px;
+    background-color: #99e;
+    font-family: monospace;
+    font-size: 2em;
+    align-items: center;
+    color: black;
+  }
+
+  .cardList::before,
+  .cardList::after {
+    content: '';
+    display: block;
+    z-index: 100;
+    width: 0px;
+    height: 0px;
+    transform: translateX(-50%);
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+  }
+
+  .cardList::before {
+    position: absolute;
+    top: 85px;
+    left: 50%;
+    border-top: 12px solid #33e;
+  }
+
+  .cardList::after {
+    position: absolute;
+    bottom: 3%;
+    left: 50%;
+    border-bottom: 12px solid #33e;
+  }
+
+  .common {
+    background-image: url("../cmd/caseApp/static/images/common.png");
+    width: 180px;
+  }
+  .nonrare {
+    background-image: url("../cmd/caseApp/static/images/2star.png");
+    width: 100px;
+  }
+  .rare{
+    background-image: url("../cmd/caseApp/static/images/3star.png");
+    width: 60px;
+  }
+  .mythical {
+    background-image: url("../cmd/caseApp/static/images/4star.png");
+    width: 40px;
+  }
+  .legendary {
+    background-image: url("../cmd/caseApp/static/images/5star.png");
+    width: 20px;
+  }
+  .card1 {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    width: 300px;
+    display: none;
+    height: 600px;
+    margin: auto; /* center the box horizontally */
+    top: 0; bottom: 0; left: 0; right: 0; /* center the box vertically */
+    text-align: center;
+    box-sizing: border-box;
+    position: absolute;
+    z-index: 999;
+    background-color: #9ebfef;
+  }
+  #spin{
+    background-color: #093f98;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 10px;
+  }
+  .cardList {
+    top:60px;
+  }
+  img {
+    width: 100%;
+  }
+
+  h2 {
+    color: #4c74d2;
+    font-size: 24px;
+    margin: 10px 0;
+  }
+
+  p {
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  .rating {
+    margin-top: 10px;
+  }
+
+  .star {
+    color: #FFD700;
+    font-size: 24px;
+  }
+
+  .cardList p{
+    font-weight: bold;
+    font-size: 24px;
+  }
+
+  body.hide {
+    display: none;
+  }
+  #message{
+    display: none;
+  }
+  /* Show the message after hiding the body */
+  h1 #message {
+    display: none;
+    text-align: center;
+  }
+  h1 #message {
+    display: none;
+    text-align: center;
+    font-size: 2rem;
+    color: red;
+    margin-top: 2rem;
+  }
+  .cont{
+    width: 600px;
+    height: 400px;
+    background: #9ebfef;
+    border-radius: 15%;
+    margin: auto; /* center the box horizontally */
+    position: absolute; /* position the box */
+    top: 0; bottom: 0; left: 0; right: 0; /* center the box vertically */
+    box-sizing: border-box; /* include padding in the width calculation */
+    text-align: center;
+    z-index: -1;
+  }
+  button{
+    background-color: #093f98;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 10px;
+  }
+</style>
+<body>
+<div id="container">
+  {{range $a,$b :=.CaseItems}}
+  <div class="card1" id="card{{$a}}">
+    <img src="/images/{{$b.Id}}" alt="My Image" width="200px">
+    <h2>{{$b.ItemName}}</h2>
+    <p>{{$b.ItemDescription}}</p>
+    {{if  eq $b.Stars  5 }}
+    <div class="rating">
+      <span class="star">&#9733;</span>
+      <span class="star">&#9733;</span>
+      <span class="star">&#9733;</span>
+      <span class="star">&#9733;</span>
+      <span class="star">&#9733;</span>
+    </div>
+    {{end}}
+    {{if eq $b.Stars  4}}
+    <div class="rating">
+      <span class="star">&#9733;</span>
+      <span class="star">&#9733;</span>
+      <span class="star">&#9733;</span>
+      <span class="star">&#9733;</span>
+    </div>
+    {{end}}
+    {{if eq $b.Stars  3}}
+    <div class="rating">
+      <span class="star">&#9733;</span>
+      <span class="star">&#9733;</span>
+      <span class="star">&#9733;</span>
+    </div>
+    {{end}}
+    {{if eq $b.Stars  2}}
+    <div class="rating">
+      <span class="star">&#9733;</span>
+      <span class="star">&#9733;</span>
+    </div>
+    {{end}}
+    {{if eq $b.Stars  1}}
+    <div class="rating">
+      <span class="star">&#9733;</span>
+    </div>
+    {{end}}
+    <button><a href="/getitem/{{$b.Id}}" style="text-decoration: none;color: white">Get Item</a></button>
+  </div>
+  {{end}}
+  <div class="cont">
+    <img src="https://i.pinimg.com/originals/f6/e9/44/f6e944f3e9244e5212116ed90c210789.png" style="width: 90px">
+    <div class="spinning" id="spen">
+      <h4>Remember!</h4>
+      <h5>Press spin button and claim your reward</h5>
+      <div id="luck">
+        <h2>Wish you luck!</h2>
+      </div>
+      <div class="cardList"><!--
+    --><div class="card common"><p>Common</p></div><!--
+    --><div class="card nonrare"><p>NotRare</p></div><!--
+    --><div class="card rare"><p>Rare</p></div><!--
+    --><div class="card mythical"><p>M</p></div><!--
+    --><div class="card legendary"><p>L</p></div><!--
+    --></div>
+      <button id="spin">Spin</button>
+    </div>
+  </div>
+  <h1 id="message">Oh oh, you had only one chance to open</h1>
+</div>
+</body>
+
+<script>
+  var cardList = document.querySelector('.cardList');
+  var cards = document.querySelectorAll('.card');
+  var speed = 10000;
+  var width = 100;
+  var randomize = true;
+  var distance = 20 * width;
+
+  for (var i = 0; i < 50; i++) {
+    var clone = cards[0].cloneNode(true);
+    var clone1 = cards[1].cloneNode(true);
+    var clone2 = cards[2].cloneNode(true);
+    var clone3 = cards[3].cloneNode(true);
+    var clone4 = cards[4].cloneNode(true);
+    cardList.appendChild(clone);
+    cardList.appendChild(clone1);
+    cardList.appendChild(clone2);
+    cardList.appendChild(clone3);
+    cardList.appendChild(clone4);
+  }
+
+  function spin() {
+    var newMargin = 0;
+    var newDistance = distance;
+    if (randomize) {
+      newDistance = Math.floor(Math.random() * cards.length * 5);
+      newDistance += cards.length * 10;
+      var rand = Math.floor((Math.random() * 100) + 1);
+      newDistance *= rand;
+    }
+
+    newMargin = -(newDistance);
+    animate(cards[0], newMargin, speed, function() {
+      setTimeout(function() {
+        findWinningCard(newMargin);
+      }, 1000);});
+  }
+
+  function animate(element, newMargin, duration, callback) {
+    var start = new Date().getTime();
+    var end = start + duration;
+    var current = parseInt(element.style.marginLeft) || 0;
+    var distance = Math.abs(parseInt(element.style.marginLeft) || 0) + Math.abs(parseInt(newMargin));
+    var step = Math.ceil(distance / (duration / 20));
+    var direction = (parseInt(newMargin) > current) ? 1 : -1;
+
+    function frame() {
+      current += step * direction;
+      element.style.marginLeft = current + 'px';
+      if ((direction > 0 && current < parseInt(newMargin)) || (direction < 0 && current > parseInt(newMargin))) {
+        requestAnimationFrame(frame);
+      } else {
+        callback();
+      }
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  document.getElementById('spin').addEventListener('click', function() {
+    document.getElementById('spin').style.display="none"
+    setTimeout(spin, 500);
+    return false;
+  });
+
+  function findWinningCard(newMargin) {
+    var cardList = document.querySelector('.cardList');
+    var cards = document.querySelectorAll('.card');
+    var winningClass=null
+    var card2 =document.getElementById("card0")
+    var card13 =document.getElementById("card1")
+    var card3 =document.getElementById("card2")
+    var card10 =document.getElementById("card3")
+    var card14 =document.getElementById("card4")
+    var spin=document.getElementById('spin')
+    var luck=document.getElementById('luck')
+
+    var winningIndex = Math.floor(((Math.abs(newMargin)+150) / 400));
+    console.log(winningIndex)
+    if(winningIndex===0){
+      res=Math.abs(newMargin)+150
+    }
+    else if(winningIndex*400<400){
+      res=winningIndex
+    }else {
+      var res = Math.abs(newMargin) - winningIndex * 400;
+      res = res + 150
+    }
+    console.log(res)
+
+    if (res<=180){
+      winningClass="common";
+    }else if(res<=280){
+      winningClass="nonrare";
+    }else if(res<=340){
+      winningClass="rare";
+    }else if(res<=380){
+      winningClass="mythical";
+    }else if(res<=400){
+      winningClass="legendary"
+    }
+
+    switch (winningClass) {
+      case "common":
+        card2.style.display="block"
+        cardList.style.display="none"
+        spin.style.display="none"
+        luck.style.display="none"
+        document.getElementById('spen').style.display = "none";
+        document.querySelector('.cont').style.display = "none";
+        break;
+      case "nonrare":
+        card13.style.display="block"
+        cardList.style.display="none"
+        spin.style.display="none"
+        luck.style.display="none"
+        document.getElementById('spen').style.display = "none";
+        document.querySelector('.cont').style.display = "none";
+        break;
+      case "rare":
+        card3.style.display="block"
+        cardList.style.display="none"
+        spin.style.display="none"
+        luck.style.display="none"
+        document.getElementById('spen').style.display = "none";
+        document.querySelector('.cont').style.display = "none";
+        break
+      case "mythical":
+        card10.style.display="block"
+        cardList.style.display="none"
+        spin.style.display="none"
+        luck.style.display="none"
+        document.getElementById('spen').style.display = "none";
+        document.querySelector('.cont').style.display = "none";
+        break;
+      case "legendary":
+        card14.style.display="block"
+        cardList.style.display="none"
+        spin.style.display="none"
+        luck.style.display="none"
+        document.getElementById('spen').style.display = "none";
+        document.querySelector('.cont').style.display = "none";
+        break;
+      default:
+        console.log("Unknown card type");
+        break;
+    }
+  }
+
+  window.addEventListener("load", function () {
+    if (performance.navigation.type === 1) {
+      document.getElementById('container').style.display="none"
+      document.getElementById('message').style.display = "block";
+    }
+  });
+
+
+</script>
+</html>
