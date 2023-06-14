@@ -1,0 +1,48 @@
+syntax="proto3";
+
+option go_package="./proto";
+
+package case;
+
+message CaseItem {
+  int64 id=1;
+  string itemName=2;
+  string itemDescription=3;
+  string type=4;
+  int64 stars=5;
+  bytes image=6;
+}
+
+message Case {
+  int64 id=1;
+  string name=2;
+  int64 price=3;
+  repeated CaseItem CaseItems=4;
+}
+
+message Cases{
+  repeated Case Cases=1;
+}
+
+message Confirm{
+  bool ok=1;
+  string message=2;
+}
+
+message CaseRequest{
+  int64 id=1;
+  string name=2;
+}
+message CaseItemRequest{
+  int64 id=1;
+  string name=2;
+}
+
+service CaseService {
+  rpc CreateCase (Case) returns (Confirm){}
+  rpc ViewCase (CaseRequest) returns (Case){}
+  rpc DeleteCase (CaseRequest) returns (Confirm){}
+  rpc ShowAllCases (Confirm) returns (Cases){}
+  rpc GetCaseItem (CaseItemRequest) returns (Confirm){}
+}
+
