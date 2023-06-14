@@ -38,6 +38,7 @@ func MakeRouter() *mux.Router {
 	router.HandleFunc("/caseitemadd", handlerCaseItem.CreateCaseItemHTMLHandler).Methods("GET", "OPTIONS")
 	router.HandleFunc("/caseitemadd", handlerCaseItem.CreateCaseItemHandler).Methods("POST", "OPTIONS")
 	router.HandleFunc("/listcaseitems", handlerCaseItem.GetAllCaseItemsHTMLHandler).Methods("GET", "OPTIONS")
+	router.HandleFunc("/deleteCaseItem/{id}", handlerCaseItem.DeleteCaseItemHandler).Methods("GET", "OPTIONS")
 
 	return router
 }
