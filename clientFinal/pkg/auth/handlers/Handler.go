@@ -3,7 +3,9 @@ package handlers
 import (
 	"clientFinal/internal/data"
 	pb "clientFinal/pkg/auth/proto"
+	"clientFinal/pkg/inventory/proto"
 	"context"
+	"fmt"
 	"google.golang.org/grpc"
 	"html/template"
 	"log"
@@ -85,7 +87,11 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	conn := ConnectGrpc()
 	defer conn.Close()
-
+	conn2, err := grpc.Dial("localhost:50054", grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("Failed to connect: %v", err)
+	}
+	client2 := proto.NewInventoryServiceClient(conn2)
 	client := pb.NewUserServiceClient(conn)
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -94,6 +100,17 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	token, err := client.Login(ctx, &user)
 	if err != nil {
 		log.Fatalf("Error caused by :%s", err)
+	}
+
+	req := proto.InventoryRequest{
+		TokenValue: token.PlainText,
+		Id:         token.Id,
+	}
+
+	inventory, err := client2.GetInventory(ctx, &req)
+	if inventory == nil {
+		conf, _ := client2.NewInventory(ctx, &req)
+		fmt.Println(conf.Message)
 	}
 
 	//Creating a cookie to use token in future
