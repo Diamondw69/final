@@ -50,6 +50,7 @@ func MakeRouter() *mux.Router {
 	router.HandleFunc("/deletecase/{id}", handlercase.DeleteCaseHandler).Methods("GET", "OPTIONS")
 
 	//inventory
+	router.HandleFunc("/store", handlercase.ShopCaseHandler).Methods("GET", "OPTIONS")
 	router.HandleFunc("/getitem/{id}", handlerI.ToInventoryHandler).Methods("GET", "OPTIONS")
 
 	return router

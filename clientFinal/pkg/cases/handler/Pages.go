@@ -70,3 +70,20 @@ func ViewAllCaseHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl = template.Must(template.ParseFiles("cmd/caseApp/static/templates/allcases.html"))
 	tmpl.ExecuteTemplate(w, "allcases.html", case1.Cases)
 }
+
+func ShopCaseHandler(w http.ResponseWriter, r *http.Request) {
+	conn := ConnectGrpc()
+	defer conn.Close()
+
+	client := proto.NewCaseServiceClient(conn)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	req := proto.Confirm{Ok: true}
+
+	case1, _ := client.ShowAllCases(ctx, &req)
+
+	tmpl = template.Must(template.ParseFiles("cmd/caseApp/static/templates/store.html"))
+	tmpl.ExecuteTemplate(w, "store.html", case1.Cases)
+}
