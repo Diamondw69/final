@@ -1,0 +1,36 @@
+syntax="proto3";
+
+option go_package="./proto";
+
+package inventory;
+
+message CaseItem {
+  int64 id=1;
+  string itemName=2;
+  string itemDescription=3;
+  string type=4;
+  int64 stars=5;
+  bytes image=6;
+}
+
+message Inventory {
+  int64 id=1;
+  int64 userid=2;
+  repeated CaseItem Items=3;
+}
+
+message Confirm{
+  bool ok=1;
+  string message=2;
+}
+message InventoryRequest{
+  string tokenValue=1;
+  int64 id=2;
+}
+
+service InventoryService {
+  rpc ToInventory (InventoryRequest) returns (Confirm){}
+  rpc NewInventory (InventoryRequest) returns (Confirm){}
+  rpc GetInventory (InventoryRequest) returns (Inventory){}
+}
+

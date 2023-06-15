@@ -243,5 +243,22 @@
         </div>
     </div>
 </div>
+<h1 style="text-align: center">Inventory</h1>
+<div class="container1">
+
+    {{range $a,$b :=.Items}}
+
+    {{if eq $a 0}}
+    {{else}}
+    <div class="card3">
+        <td>{{$a}}</td>
+        <td>{{$b.ItemName}}</td>
+        <td>{{$b.Type}}</td>
+        <td>{{$b.Stars}}</td>
+        <td><img src="/images/{{$b.Id}}" alt="My Image" width="200px"></td>
+    </div>
+    {{end}}
+    {{end}}
+</div>
 </body>
 </html>

@@ -4,6 +4,7 @@ import (
 	"clientFinal/pkg/auth/handlers"
 	"clientFinal/pkg/caseItems/handlerCaseItem"
 	handlercase "clientFinal/pkg/cases/handler"
+	"clientFinal/pkg/inventory/handlerI"
 	"github.com/gorilla/mux"
 	"net/http"
 )
@@ -47,6 +48,9 @@ func MakeRouter() *mux.Router {
 	router.HandleFunc("/case/{id}", handlercase.ViewCaseHandler).Methods("GET", "OPTIONS")
 	router.HandleFunc("/cases", handlercase.ViewAllCaseHandler).Methods("GET", "OPTIONS")
 	router.HandleFunc("/deletecase/{id}", handlercase.DeleteCaseHandler).Methods("GET", "OPTIONS")
+
+	//inventory
+	router.HandleFunc("/getitem/{id}", handlerI.ToInventoryHandler).Methods("GET", "OPTIONS")
 
 	return router
 }
