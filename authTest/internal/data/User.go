@@ -33,7 +33,7 @@ RETURNING id`
 	err := m.DB.QueryRowContext(ctx, query, args...).Scan(&user.Id)
 	if err != nil {
 		switch {
-		case err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
+		case err.Error() == `pq: повторяющееся значение ключа нарушает ограничение уникальности "users_email_key"`:
 			return ErrDuplicateEmail
 		default:
 			return err
@@ -142,6 +142,32 @@ AND tokens.scope = $2`
 	}
 
 	return &user, nil
+}
+
+func (m UserModel) DeleteUser(name string) error {
+
+	if name == "" {
+		return ErrRecordNotFound
+	}
+
+	query := `
+DELETE FROM users
+WHERE name = $1`
+
+	result, err := m.DB.Exec(query, name)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return ErrRecordNotFound
+	}
+	return nil
 }
 
 func Matches(plaintextPassword string, hash []byte) (bool, error) {

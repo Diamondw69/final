@@ -43,7 +43,7 @@ func NewGrpcServer(rabbitMQConn *amqp.Connection, db *sql.DB) {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	log.Println("Server started on port 50054")
+	log.Println("Server started on port " + TcpPort)
 
 	if err := grpcServer.Serve(listener); err != nil {
 		log.Fatalf("failed to serve: %v", err)
