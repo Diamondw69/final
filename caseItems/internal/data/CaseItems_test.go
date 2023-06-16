@@ -21,7 +21,7 @@ func MakeAuthServer() *CaseItemServer {
 	if err != nil {
 		log.Fatalf("Failed to connect to RabbitMQ: %v", err)
 	}
-	db, er := sql.Open("postgres", "postgres://postgres:24052004@localhost:5432/auth?sslmode=disable")
+	db, er := sql.Open("postgres", "postgres://diamondw:7PTGiP7WLhz5yHF7PRbkk7inqCLrjjP5@dpg-ci5tp218g3n4q9uac9u0-a.oregon-postgres.render.com/auth_rs5f")
 	if er != nil {
 		log.Fatalf("postgres doesnt work : %s", er)
 	}
