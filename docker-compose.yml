@@ -1,0 +1,31 @@
+version: '3.8'
+services:
+   microservice0:
+    image: clientfinal:latest
+    build: ./clientFinal
+    ports:
+     - "8080:8080"
+   microservice1:
+    image: authtest:latest
+    build: ./authTest
+    ports:
+     - "50051:50051"
+   microservice2:
+    image: case:latest
+    build: ./case
+    ports:
+     - "50053:50053"
+   microservice3:
+    image: caseitems:latest
+    build: ./caseItems
+    ports:
+     - "50052:50052"
+   microservice4:
+    image: inventory:latest
+    build: ./inventory
+    ports:
+     - "50054:50054"
+   rabbit:
+     ports:
+       - "15672:15672" # RabbitMQ management port
+       - "5673:5672"

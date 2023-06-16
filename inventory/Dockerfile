@@ -1,8 +1,8 @@
-FROM golang:1.17-alpine
+FROM golang:1.20-alpine
 
 WORKDIR /app/clientFinal
 COPY . .
 
 RUN go mod download
 
-CMD ["go", "run", "cmd/inventory/main.go"]
+CMD ["go", "run", "./cmd/inventory/main.go"]
